@@ -2,20 +2,20 @@
 
 @if (_isVisible)
 {
-    <div class="demonick-toast demonick-fade show @_cssClass demonick-toast-position">
-        <div class="demonick-toast-header @_cssClass">
-            <strong class="demonick-mr-right">@_header</strong>
+    <div class="blazor-toast blazor-fade show @_cssClass blazor-toast-position">
+        <div class="blazor-toast-header @_cssClass">
+            <strong class="blazor-mr-right">@_header</strong>
 
             <button type="button"
                     @onclick="CloseAsync"
-                    class="demonick-close"
+                    class="blazor-close"
                     aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
 
-        <div class="demonick-toast-body">
-            <img src="@_image" class="demonick-toast-body-image" alt="" />
+        <div class="blazor-toast-body">
+            <img src="@_image" class="blazor-toast-body-image" alt="" />
             @_message
         </div>
     </div>
@@ -38,8 +38,8 @@
         Show(
             header,
             message,
-            "demonick-toast-bg-success",
-            "demonick_toast_images/success_icon.png");
+            "blazor-toast-bg-success",
+            "toast-images/success_icon.png");
     }
 
     public void ShowWarning(string header, string message)
@@ -47,8 +47,8 @@
         Show(
             header,
             message,
-            "demonick-toast-bg-warning",
-            "demonick_toast_images/warning_icon.png");
+            "blazor-toast-bg-warning",
+            "toast-images/warning_icon.png");
     }
 
     public void ShowError(string header, string message)
@@ -56,8 +56,8 @@
         Show(
             header,
             message,
-            "demonick-toast-bg-error",
-            "demonick_toast_images/error_icon.png");
+            "blazor-toast-bg-error",
+            "toast-images/error_icon.png");
     }
 
     public void ShowByStatusCode(int status, string header, string message)
