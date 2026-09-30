@@ -1,129 +1,196 @@
-@using System.Timers
+@implements IDisposable
 
-@if (showMessage)
+@if (_isVisible)
 {
-    <div class="demonick-toast demonick-fade show @CssClass demonick-toast-position">
-        <div class="demonick-toast-header @CssClass">
-            <strong class="demonick-mr-right">@Header</strong>
-            <button type="button" @onclick="CloseMessage" class="demonick-close" data-dismiss="demonick-toast" aria-label="Close">
+    <div class="demonick-toast demonick-fade show @_cssClass demonick-toast-position">
+        <div class="demonick-toast-header @_cssClass">
+            <strong class="demonick-mr-right">@_header</strong>
+
+            <button type="button"
+                    @onclick="CloseAsync"
+                    class="demonick-close"
+                    aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
+
         <div class="demonick-toast-body">
-            <img src="@Image" class="demonick-toast-body-image" alt="Image"/>
-            @Message
+            <img src="@_image" class="demonick-toast-body-image" alt="" />
+            @_message
         </div>
     </div>
 }
 
 @code {
-    string CssClass;
-    string Image;
-    string Header;
-    string Message;
+    private const int DefaultDurationMilliseconds = 4000;
 
-    Timer timer;
+    private CancellationTokenSource? _dismissCancellationTokenSource;
 
-    bool showMessage = false;
+    private string _cssClass = string.Empty;
+    private string _image = string.Empty;
+    private string _header = string.Empty;
+    private string _message = string.Empty;
 
-    void ElapsedTimerHandler(object sender, ElapsedEventArgs args)
+    private bool _isVisible;
+
+    public void ShowSuccess(string header, string message)
     {
-        Task.Run(CloseMessage);
+        Show(
+            header,
+            message,
+            "demonick-toast-bg-success",
+            "demonick_toast_images/success_icon.png");
     }
 
-    public void SuccessfulMassage(string header, string message)
+    public void ShowWarning(string header, string message)
     {
-        Header = header;
-        Message = message;
-        showMessage = true;
-        CssClass = "demonick-toast-bg-success";
-        Image = "demonick_toast_images/success_icon.png";
-        StartTimer();
+        Show(
+            header,
+            message,
+            "demonick-toast-bg-warning",
+            "demonick_toast_images/warning_icon.png");
     }
 
-    public void WarningMassage(string header, string message)
+    public void ShowError(string header, string message)
     {
-        Header = header;
-        Message = message;
-        showMessage = true;
-        CssClass = "demonick-toast-bg-warning";
-        Image = "demonick_toast_images/warning_icon.png";
-        StartTimer();
+        Show(
+            header,
+            message,
+            "demonick-toast-bg-error",
+            "demonick_toast_images/error_icon.png");
     }
 
-    public void ErrorMassage(string header, string message)
-    {
-        Header = header;
-        Message = message;
-        showMessage = true;
-        CssClass = "demonick-toast-bg-error";
-        Image = "demonick_toast_images/error_icon.png";
-        StartTimer();
-    }
-
-    public void ChooseMessageWithStatusCode(int? status, string header, string message)
+    public void ShowByStatusCode(int status, string header, string message)
     {
         switch (status)
         {
             case 1:
-                SuccessfulMassage(header, message);
+                ShowSuccess(header, message);
                 break;
+
             case 2:
-                WarningMassage(header, message);
+                ShowWarning(header, message);
                 break;
+
             case 3:
-                ErrorMassage(header, message);
+                ShowError(header, message);
                 break;
         }
     }
 
-    public void ChooseMessageWithStatusCode(int? status, string message)
+    public void ShowByStatusCode(int status, string message)
     {
         switch (status)
         {
             case 1:
-                SuccessfulMassage("Successfull", message);
+                ShowSuccess("Success", message);
                 break;
+
             case 2:
-                WarningMassage("Warning", message);
+                ShowWarning("Warning", message);
                 break;
+
             case 3:
-                ErrorMassage("Error", message);
+                ShowError("Error", message);
                 break;
         }
     }
 
-    public void ChooseMessageWithStatusCode(int status, string itemName, string action)
+    public void ShowByStatusCode(int status, string itemName, string action)
     {
         switch (status)
         {
             case 1:
-                SuccessfulMassage("Successfull", $"{itemName} {action} successfull!");
+                ShowSuccess(
+                    "Success",
+                    $"{itemName} {action} successful!");
                 break;
+
             case 2:
-                WarningMassage("Warning", $"{itemName} {action} have some warning!");
+                ShowWarning(
+                    "Warning",
+                    $"{itemName} {action} has a warning.");
                 break;
+
             case 3:
-                ErrorMassage("Error", $"{itemName} {action} failed!");
+                ShowError(
+                    "Error",
+                    $"{itemName} {action} failed.");
                 break;
         }
     }
 
-    void StartTimer()
+    private void Show(
+        string header,
+        string message,
+        string cssClass,
+        string image)
     {
-        timer = new Timer { Interval = 4000 };
-        timer.Elapsed += ElapsedTimerHandler;
-        timer.Start();
+        _header = header;
+        _message = message;
+        _cssClass = cssClass;
+        _image = image;
+        _isVisible = true;
+
+        StartAutoDismiss();
+
         StateHasChanged();
     }
 
-    async Task CloseMessage()
+    private void StartAutoDismiss()
     {
-        timer.Stop();
-        timer.Elapsed -= ElapsedTimerHandler;
-        timer.Dispose();
-        showMessage = false;
-        await InvokeAsync(StateHasChanged);
+        CancelAutoDismiss();
+
+        _dismissCancellationTokenSource = new CancellationTokenSource();
+
+        _ = AutoDismissAsync(_dismissCancellationTokenSource.Token);
     }
 
+    private async Task AutoDismissAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(
+                DefaultDurationMilliseconds,
+                cancellationToken);
+
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                await InvokeAsync(async () =>
+                {
+                    await CloseAsync();
+                });
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // Toast was closed manually or replaced by another notification.
+        }
+    }
+
+    private Task CloseAsync()
+    {
+        CancelAutoDismiss();
+
+        _isVisible = false;
+
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private void CancelAutoDismiss()
+    {
+        if (_dismissCancellationTokenSource is null)
+        {
+            return;
+        }
+
+        _dismissCancellationTokenSource.Cancel();
+        _dismissCancellationTokenSource.Dispose();
+        _dismissCancellationTokenSource = null;
+    }
+
+    public void Dispose()
+    {
+        CancelAutoDismiss();
+    }
 }
