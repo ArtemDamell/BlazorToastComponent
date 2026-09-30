@@ -83,13 +83,8 @@
     margin: -1rem -1rem -1rem auto;
 }
 
-.blazor-close:hover {
-    color: #000;
-    text-decoration: none
-}
-
-.blazor-toast-close:hover,
-.blazor-toast-close:focus {
+.blazor-close:hover,
+.blazor-close:focus {
     color: #000;
     text-decoration: none;
     opacity: .75;
