@@ -1,31 +1,218 @@
-## This is a toast component for Blazor Server, created by me in 2021.
+# Blazor Toast Component
 
-The component uses the System.Timers namespace and includes several methods for displaying toast messages with different status codes, such as SuccessfulMessage(), WarningMessage(), and ErrorMessage(). The component also includes a method ChooseMessageWithStatusCode() that allows the user to choose a message based on a specific status code.
+A lightweight reusable toast notification component for Blazor Server applications.
 
-When a message is displayed, the component adds a demonick-toast class to the containing div element and uses CSS classes to apply different background colors and icons for different message types.
+The component provides success, warning, and error notifications with custom messages, automatic dismissal, manual closing, and simple status-code based APIs.
 
-The component also includes a timer that automatically closes the message after a set amount of time, which can be customized by changing the Interval property of the timer.
+Originally created in 2021 and later refactored and cleaned up as a standalone portfolio component.
 
-Overall, this is a useful component for displaying toast messages in a Blazor Server application.
+## Features
 
-# Toast Component:  
-**1. Add the component in Shared or another folder**  
-**2. Add the CSS file in wwwroot/css and include in _Host.cshtml** _(e.g. link href="css/demonick_toast.css" rel="stylesheet" )_  
-**3. Add image folder in wwwroot/demonick_toast_images**  
-**4. Add the component in page** _(e.g. <AlertComponent @ref="@alert" />)_  
-**5. Initialize AlertComponent class** _(e.g. AlertComponent alert; )_  
-**6. Use calling method for showing alert**  
-_(e.g.  
-            alert.ChooseMessageWithStatusCode(1, "Header message", "Body message");  
-**or**  
-            alert.SuccessfulMessage("Header message", "Body message");  
-**or**  
-            alert.ErrorMessage("Header message", "Body message");  
-**or**  
-            alert.WarningMessage("Header message", "Body message");   
-    )_  
+- Success notifications
+- Warning notifications
+- Error notifications
+- Custom notification headers and messages
+- Automatic dismissal after 4 seconds
+- Manual close button
+- Cancellation of a previous auto-dismiss operation when a new notification is shown
+- Status-code based notification API
+- Reusable Razor component
+- Standalone CSS styling
+- Reduced-motion support
+- No external UI component library required
 
-**Status codes:**  
-1 - Successfull message alert  
-2 - Warning message alert  
-3 - Error message alert  
+## Repository Structure
+
+```text
+BlazorToast/
+├── Toast.razor
+├── blazor-toast.css
+└── toast-images/
+    ├── success_icon.png
+    ├── warning_icon.png
+    └── error_icon.png
+```
+
+## Component API
+
+The component exposes three primary methods:
+
+```csharp
+ShowSuccess(string header, string message)
+ShowWarning(string header, string message)
+ShowError(string header, string message)
+```
+
+Example:
+
+```csharp
+_toast?.ShowSuccess(
+    "Success",
+    "Changes were saved successfully.");
+```
+
+```csharp
+_toast?.ShowWarning(
+    "Warning",
+    "Please check the entered values.");
+```
+
+```csharp
+_toast?.ShowError(
+    "Error",
+    "The operation failed.");
+```
+
+## Status Code API
+
+Notifications can also be displayed using status codes:
+
+```csharp
+ShowByStatusCode(int status, string header, string message)
+```
+
+or:
+
+```csharp
+ShowByStatusCode(int status, string message)
+```
+
+Status codes:
+
+```text
+1 = Success
+2 = Warning
+3 = Error
+```
+
+Example:
+
+```csharp
+_toast?.ShowByStatusCode(
+    1,
+    "Operation completed successfully.");
+```
+
+The component also contains an overload intended for simple entity/action notifications:
+
+```csharp
+ShowByStatusCode(
+    int status,
+    string itemName,
+    string action)
+```
+
+## Automatic Dismissal
+
+Notifications are automatically dismissed after:
+
+```csharp
+4000 milliseconds
+```
+
+The component uses:
+
+```csharp
+CancellationTokenSource
+```
+
+together with:
+
+```csharp
+Task.Delay
+```
+
+to manage automatic dismissal.
+
+If another notification is displayed before the current one is dismissed, the previous pending dismissal operation is cancelled.
+
+The component implements `IDisposable` so cancellation resources are cleaned up when the component is disposed.
+
+## Using the Component
+
+Copy:
+
+```text
+Toast.razor
+```
+
+into your Blazor project.
+
+Copy:
+
+```text
+blazor-toast.css
+```
+
+into your application's static CSS directory, for example:
+
+```text
+wwwroot/css/
+```
+
+Copy the image directory:
+
+```text
+toast-images/
+```
+
+into:
+
+```text
+wwwroot/toast-images/
+```
+
+Then reference the stylesheet from the application's host page:
+
+```html
+<link href="css/blazor-toast.css" rel="stylesheet" />
+```
+
+Add the component to a Razor page or layout:
+
+```razor
+<Toast @ref="_toast" />
+```
+
+Create a component reference:
+
+```csharp
+private Toast? _toast;
+```
+
+You can then display notifications directly:
+
+```csharp
+_toast?.ShowSuccess(
+    "Success",
+    "The operation completed successfully.");
+```
+
+## Styling
+
+The component includes standalone CSS classes for:
+
+- toast container
+- header
+- body
+- close button
+- positioning
+- success state
+- warning state
+- error state
+- fade transitions
+
+The included stylesheet can be modified to match the visual style of another Blazor application.
+
+## About This Project
+
+This repository contains a small reusable Blazor UI component rather than a complete application.
+
+It is included in my GitHub portfolio as an example of:
+
+- reusable Razor component development
+- component-level state management
+- asynchronous UI behavior
+- cancellation handling
+- CSS-based notification states
+- simple public component APIs
